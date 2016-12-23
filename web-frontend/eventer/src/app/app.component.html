@@ -1,0 +1,23 @@
+<section class="eventer">
+  <header class="header">
+    <h1>Eventer</h1>
+  </header>
+  <section class="main" *ngIf="eventers && eventers.length > 0">
+    <ul class="eventer-list">
+      <li *ngFor="let eventer of eventers">
+        <div class="view">
+          <ul>
+          <li><label>{{eventer.name}}</label></li>
+          <li><label>{{eventer.owner}}</label></li>
+          <li><label>{{eventer.description}}</label></li>
+          <li><label>{{eventer.date}}</label></li>
+          </ul>
+          <br/>
+        </div>
+      </li>
+    </ul>
+  </section>
+  <footer class="footer" *ngIf="eventers && eventers.length > 0">
+    <span class="eventer-count"><strong>{{eventers.length}}</strong> {{eventers.length == 1 ? 'event' : 'events'}}</span>
+  </footer>
+</section>
