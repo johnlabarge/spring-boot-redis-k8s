@@ -1,14 +1,13 @@
 apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
-  name: "app-deployment"
+  name: "api-deployment"
 spec:
   replicas: 3
   template:
     metadata:
       labels:
         app: spring-boot-app
-        frontend: boot-frontend
     spec:
       containers:
         - name: api
@@ -19,12 +18,3 @@ spec:
               memory: 100Mi
           ports:
           - containerPort: 8080
-
-        - name: app-nginx
-          image: gcr.io/cloudjlb-eventer/web-frontend:latest
-          resources:
-            requests:
-              cpu: 100m
-              memory: 100Mi
-          ports:
-           - containerPort: 80

@@ -1,0 +1,10 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: boot-ingress
+spec:
+  tls:
+    - secretName: self-signed-cert
+  backend:
+    serviceName: fe-service
+    servicePort: 80

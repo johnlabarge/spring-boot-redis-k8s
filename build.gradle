@@ -25,7 +25,7 @@ jar {
 group = "gcr.io/cloudjlb-eventer"
 
 
-task buildDocker(type: Docker, dependsOn: build) {
+task buildBootContainer(type: Docker, dependsOn: build) {
     push = false
     applicationName = jar.baseName
     tag = "${project.group}/${applicationName}"
@@ -39,18 +39,15 @@ task buildDocker(type: Docker, dependsOn: build) {
     }
 }
 
-task deployDockerToGCP(type: Exec, dependsOn: buildDocker) {
-
-    commandLine "gcloud","docker","--","push", "${buildDocker.tag}"
+task deployBootContainer(type: Exec, dependsOn: buildBootContainer) {
+    commandLine "gcloud","docker","--","push", "${buildBootContainer.tag}"
 }
-task feDocker(type: Docker) {
+task buildFeContainer(type: Docker) {
     push = false
     tag = "${project.group}/web-frontend"
     dockerfile = file('web-frontend/eventer/Dockerfile')
     doFirst {
-        println "DO FIRST##########"
         copy {
-            println "copy-----"
             from file("web-frontend/eventer/dist")
             into file(stageDir.getPath()+'/dist')
         }
@@ -60,8 +57,8 @@ task feDocker(type: Docker) {
         }
     }
 }
-task deployFe(type: Exec, dependsOn: feDocker) {
-    commandLine "gcloud", "docker", "--", "push",  "${feDocker.tag}"
+task deployFeContainer(type: Exec, dependsOn: buildFeContainer) {
+    commandLine "gcloud", "docker", "--", "push",  "${buildFeContainer.tag}"
 }
 
 task deployment
