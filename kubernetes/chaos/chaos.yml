@@ -1,0 +1,19 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: chaoskube
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: chaoskube
+    spec:
+      containers:
+      - name: chaoskube
+        image: quay.io/linki/chaoskube:v0.3.1
+        args:
+        - --in-cluster
+        - --interval=20s
+        - --no-dry-run
+        - --debug

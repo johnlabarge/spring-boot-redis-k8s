@@ -84,8 +84,12 @@ Note it is a self signed certificate so you will need to dismiss the warning and
 This will present the angular app.  Alternatively you can send postman to
 https://<ADDRESS above>/api/events
 
-### 8. Create mahem with redis and ensure still cached 
+### 8. Create mahem with redis and ensure still cached
 Example:
 ```
 kubectl exec -it redis-master -- kill 1
+```
+Or just use chaoskube:
+```
+kubectl create -f kubernetes/chaos/chaos.yml
 ```
