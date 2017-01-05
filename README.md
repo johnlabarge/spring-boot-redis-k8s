@@ -44,7 +44,7 @@ used to call hte api directly.
 
 #### 1. Update gradle source in build.gradle with proper project name at line:
 ```groovy
-group = "gcr.io/cloudjlb-eventer"
+project.ext.gcp = "gcr.io/cloudjlb-eventer"
 ```
 #### 2. Build and push docker images to your Google Container Registry
 ```

@@ -22,13 +22,13 @@ jar {
     baseName = 'spring-boot-app'
     version  = '0.1.0'
 }
-group = "gcr.io/cloudjlb-eventer"
+project.ext.gcp = "gcr.io/cloudjlb-eventer"
 
 
 task buildBootImage(type: Docker, dependsOn: build) {
     push = false
     applicationName = jar.baseName
-    tag = "${project.group}/${applicationName}"
+    tag = "${project.ext.gcp}/${applicationName}"
     tagVersion=null
     dockerfile = file('src/main/docker/Dockerfile')
     doFirst {
@@ -52,7 +52,7 @@ task buildAngular(type: Exec, dependsOn: npmInstall) {
 }
 task buildFeImage(type: Docker, dependsOn: buildAngular) {
     push = false
-    tag = "${project.group}/web-frontend"
+    tag = "${project.ext.gcp}/web-frontend"
     dockerfile = file('web-frontend/eventer/Dockerfile')
     doFirst {
         copy {
@@ -71,7 +71,7 @@ task deployFeImage(type: Exec, dependsOn: buildFeImage) {
 
 task buildRedisImage(type: Docker) {
     push = false
-    tag = "${project.group}/redis-sentinel"
+    tag = "${project.ext.gcp}/redis-sentinel"
     dockerfile = file("redis-docker/Dockerfile")
     doFirst {
         copy {
