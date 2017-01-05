@@ -2,9 +2,11 @@ apiVersion: extensions/v1beta1
 kind: Ingress
 metadata:
   name: boot-ingress
+  annotations:
+      kubernetes.io/ingress.allow-http: "false"
 spec:
   tls:
-    - secretName: self-signed-cert
+  - secretName: self-signed-cert
   backend:
     serviceName: fe-service
     servicePort: 80

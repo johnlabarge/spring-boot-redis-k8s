@@ -1,0 +1,40 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: redis-slave
+  labels:
+    app: redis-slave
+spec:
+  ports:
+  - port: 6379
+    name: redis-slave
+  clusterIP: None
+  selector:
+    app: redis-slave
+---
+apiVersion: apps/v1beta1
+kind: StatefulSet
+metadata:
+  name: redis-slave
+spec:
+  serviceName: redis-slave
+  replicas: 4
+  template:
+    metadata:
+      labels:
+        app: redis-slave
+    spec:
+      terminationGracePeriodSeconds: 10
+      containers:
+      - name: redis-slave
+        image: gcr.io/cloudjlb-eventer/redis-sentinel
+        imagePullPolicy: Always
+        env:
+        - name: TYPE
+          value: SLAVE
+        - name: MASTER
+          value: redis-master-0.redis-master
+        ports:
+        - containerPort: 6379
+          name: redis-slave
+

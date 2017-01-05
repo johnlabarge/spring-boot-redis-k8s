@@ -23,4 +23,14 @@ public class EventController {
   public List<Event> getEvents() throws Exception {
        return eventService.getAllEvents();
   }
+
+  @CrossOrigin
+  @RequestMapping(value="/evict-event-cache",
+                  method=RequestMethod.GET,
+                  produces="application/json")
+  public String evictEventCache() throws Exception {
+       eventService.evictEventsCache();
+       return "OK";
+  }
+
 }

@@ -2,12 +2,13 @@ package com.google.cloudjlb;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 
+import java.io.Serializable;
 import java.util.Date;
 
 /**
  * Created by johnlabarge on 12/20/16.
  */
-public class Event {
+public class Event implements Serializable {
 
   private String externalLink;
   private String description;

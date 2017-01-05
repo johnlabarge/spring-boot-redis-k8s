@@ -61,6 +61,25 @@ task deployFeContainer(type: Exec, dependsOn: buildFeContainer) {
     commandLine "gcloud", "docker", "--", "push",  "${buildFeContainer.tag}"
 }
 
+task buildRedisContainer(type: Docker) {
+    push = false
+    tag = "${project.group}/redis-sentinel"
+    dockerfile = file("redis-docker/Dockerfile")
+    doFirst {
+        copy {
+            from file("redis-docker/docker-entrypoint.sh")
+            into file(stageDir.getPath())
+        }
+        copy {
+            from file("redis-docker/redis.conf")
+            into file(stageDir.getPath())
+         }
+    }
+}
+
+task deployRedisContainer(type: Exec, dependsOn: buildRedisContainer) {
+    commandLine "gcloud", "docker", "--", "push", "${buildRedisContainer.tag}"
+}
 task deployment
 repositories {
     mavenCentral()
@@ -70,6 +89,9 @@ sourceCompatibility = 1.8
 dependencies {
     compile "org.springframework.boot:spring-boot-starter-web"
     compile "org.springframework.boot:spring-boot-starter-actuator"
+    compile "org.springframework.data:spring-data-redis"
+
+    compile "biz.paluch.redis:lettuce:3.5.0.Final"
     compile "se.transmode.gradle:gradle-docker:1.2"
     //compile "org.springframework.boot:spring-boot-starter-security"
     //compile "com.google.firebase:firebase-admin:4.0.3"
