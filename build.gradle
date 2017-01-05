@@ -25,7 +25,7 @@ jar {
 group = "gcr.io/cloudjlb-eventer"
 
 
-task buildBootContainer(type: Docker, dependsOn: build) {
+task buildBootImage(type: Docker, dependsOn: build) {
     push = false
     applicationName = jar.baseName
     tag = "${project.group}/${applicationName}"
@@ -39,10 +39,14 @@ task buildBootContainer(type: Docker, dependsOn: build) {
     }
 }
 
-task deployBootContainer(type: Exec, dependsOn: buildBootContainer) {
-    commandLine "gcloud","docker","--","push", "${buildBootContainer.tag}"
+task deployBootImage(type: Exec, dependsOn: buildBootImage) {
+    commandLine "gcloud","docker","--","push", "${buildBootImage.tag}"
 }
-task buildFeContainer(type: Docker) {
+task buildAngular(type: Exec) {
+    workingDir "web-frontend/eventer"
+    commandLine "ng", "build"
+}
+task buildFeImage(type: Docker, dependsOn: buildAngular) {
     push = false
     tag = "${project.group}/web-frontend"
     dockerfile = file('web-frontend/eventer/Dockerfile')
@@ -57,11 +61,11 @@ task buildFeContainer(type: Docker) {
         }
     }
 }
-task deployFeContainer(type: Exec, dependsOn: buildFeContainer) {
-    commandLine "gcloud", "docker", "--", "push",  "${buildFeContainer.tag}"
+task deployFeImage(type: Exec, dependsOn: buildFeImage) {
+    commandLine "gcloud", "docker", "--", "push",  "${buildFeImage.tag}"
 }
 
-task buildRedisContainer(type: Docker) {
+task buildRedisImage(type: Docker) {
     push = false
     tag = "${project.group}/redis-sentinel"
     dockerfile = file("redis-docker/Dockerfile")
@@ -77,8 +81,8 @@ task buildRedisContainer(type: Docker) {
     }
 }
 
-task deployRedisContainer(type: Exec, dependsOn: buildRedisContainer) {
-    commandLine "gcloud", "docker", "--", "push", "${buildRedisContainer.tag}"
+task deployRedisImage(type: Exec, dependsOn: buildRedisImage) {
+    commandLine "gcloud", "docker", "--", "push", "${buildRedisImage.tag}"
 }
 task deployment
 repositories {

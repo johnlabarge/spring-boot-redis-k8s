@@ -16,6 +16,9 @@
 #### a. combined fe+api vs. separate
 #### b. self signed cert
 
+## Prerequisites
+1.  Docker up and running
+2.  angular-cli installed (npm install -g angular cli (also requires npm and nodejs))
 
 ## The app
 
@@ -30,8 +33,8 @@ used to call hte api directly.
 ### 1. App & Frontend Service - boot-app and fe-service in app.yml, fe.yml and combined in combined.yml
 ###  a. Dockerfile src/main/docker/Dockerfile and web-frontend/Dockerfile
 #### b. deploy docker files with gradle tasks:
-##### i. deployFeContainer
-##### ii. deployBootContainer
+##### i. deployFeImage
+##### ii. deployBootImage
 ### 2. Cache redis-master.yml, redis-sentinel.yml and redis-slave.yml stateful sets of redis containers
 #### a. Dockerfile redis-docker/Dockerfile
 #### b. redis.conf - base configuration
@@ -39,15 +42,15 @@ used to call hte api directly.
 
 ## Get it working in GKE
 
-#### 1. Update gradle source with proper project name at line:
+#### 1. Update gradle source in build.gradle with proper project name at line:
 ```groovy
 group = "gcr.io/cloudjlb-eventer"
 ```
-#### 2. Deploy docker containers to your projects repository
+#### 2. Build and push docker images to your Google Container Registry
 ```
-$ gradle deployFEContainer
-$ gradle deployBootContainer
-$ gradle deployRedisContainer
+$ gradle deployFEImage
+$ gradle deployBootImage
+$ gradle deployRedisImage
 ```
 #### 3. Deploy redis cache pods
 ```
