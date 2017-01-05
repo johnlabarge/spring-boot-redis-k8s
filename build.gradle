@@ -42,7 +42,11 @@ task buildBootImage(type: Docker, dependsOn: build) {
 task deployBootImage(type: Exec, dependsOn: buildBootImage) {
     commandLine "gcloud","docker","--","push", "${buildBootImage.tag}"
 }
-task buildAngular(type: Exec) {
+task npmInstall(type: Exec) {
+    workingDir "web-frontend/eventer"
+    commandLine  "npm", "install", "."
+}
+task buildAngular(type: Exec, dependsOn: npmInstall) {
     workingDir "web-frontend/eventer"
     commandLine "ng", "build"
 }
