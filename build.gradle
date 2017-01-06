@@ -30,7 +30,7 @@ task buildBootImage(type: Docker, dependsOn: build) {
     applicationName = jar.baseName
     tag = "${project.ext.gcp}/${applicationName}"
     tagVersion=null
-    dockerfile = file('src/main/docker/Dockerfile')
+    dockerfile = file('kubernetes/images/spring-boot/Dockerfile')
     doFirst {
         copy {
             from jar
@@ -53,7 +53,7 @@ task buildAngular(type: Exec, dependsOn: npmInstall) {
 task buildFeImage(type: Docker, dependsOn: buildAngular) {
     push = false
     tag = "${project.ext.gcp}/web-frontend"
-    dockerfile = file('web-frontend/eventer/Dockerfile')
+    dockerfile = file('kubernetes/images/frontend/Dockerfile')
     doFirst {
         copy {
             from file("web-frontend/eventer/dist")
@@ -72,23 +72,83 @@ task deployFeImage(type: Exec, dependsOn: buildFeImage) {
 task buildRedisImage(type: Docker) {
     push = false
     tag = "${project.ext.gcp}/redis-sentinel"
-    dockerfile = file("redis-docker/Dockerfile")
+    dockerfile = file("kubernetes/images/redis/Dockerfile")
     doFirst {
         copy {
-            from file("redis-docker/docker-entrypoint.sh")
+            from file("kubernetes/images/redis/docker-entrypoint.sh")
             into file(stageDir.getPath())
         }
         copy {
-            from file("redis-docker/redis.conf")
+            from file("kubernetes/images/redis/redis.conf")
             into file(stageDir.getPath())
          }
     }
 }
 
+
 task deployRedisImage(type: Exec, dependsOn: buildRedisImage) {
     commandLine "gcloud", "docker", "--", "push", "${buildRedisImage.tag}"
 }
-task deployment
+
+def gcpFilter = { String line -> line.replaceAll("#GCP", project.ext.gcp) }
+task buildKubs  << {
+    copy {
+        from 'kubernetes/redis'
+        into 'kubernetes-build/redis'
+        filter gcpFilter
+    }
+    copy {
+        from 'kubernetes/app'
+        into 'kubernetes-build/app'
+        filter gcpFilter
+    }
+    copy {
+        from 'kubernetes/frontend'
+        into 'kubernetes-build/frontend'
+        filter gcpFilter
+    }
+}
+
+task deployToGKE(type: DefaultTask, dependsOn: buildKubs) {
+    def kubectl = ["kubectl", "create", "-f"]
+    def buildDir = "kubernetes-build"
+    doLast {
+        exec {
+            workingDir buildDir
+            commandLine kubectl + "redis/"
+        }
+        exec {
+            workingDir buildDir
+            commandLine kubectl + "app/"
+        }
+        exec {
+            workingDir buildDir
+            commandLine kubectl + "frontend/"
+        }
+        exec {
+            commandLine kubectl + "kubernetes/load-balancer/"
+        }
+    }
+}
+
+task deleteFromGKE << {
+    def kubedel = ["kubectl", "delete"]
+    exec { commandLine kubedel + ["service", "redis-master"] }
+    exec { commandLine kubedel + ["service", "redis-sentinel"] }
+    exec { commandLine kubedel + ["service", "redis-slave"] }
+    exec { commandLine kubedel + ["statefulset", "redis-slave"] }
+    exec { commandLine kubedel + ["statefulset", "redis-sentinel"] }
+    exec { commandLine kubedel + ["statefulset", "redis-master"] }
+    exec { commandLine kubedel + ["deployment", "spring-boot"] }
+    exec { commandLine kubedel + ["deployment", "frontend"] }
+    exec { commandLine kubedel + ["service", "frontend"] }
+    exec { commandLine kubedel + ["service", "api"] }
+    exec { commandLine kubedel + ["ing", "boot"] }
+    exec { commandLine kubedel + ["secret", "self-signed-cert"] }
+}
+
+
+
 repositories {
     mavenCentral()
 }

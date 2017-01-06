@@ -28,7 +28,7 @@ spec:
     spec:
       containers:
         - name: spring-boot
-          image: #GCP/spring-boot-app:latest
+          image: gcr.io/cloudjlb-eventer/spring-boot-app:latest
           resources:
             requests:
               cpu: 100m

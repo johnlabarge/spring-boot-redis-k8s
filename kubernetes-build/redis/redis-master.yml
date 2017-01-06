@@ -27,7 +27,7 @@ spec:
       terminationGracePeriodSeconds: 10
       containers:
       - name: redis-master
-        image: #GCP/redis-sentinel
+        image: gcr.io/cloudjlb-eventer/redis-sentinel
         imagePullPolicy: Always
         ports:
         - containerPort: 6379

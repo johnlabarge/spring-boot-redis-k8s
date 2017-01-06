@@ -1,9 +1,9 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: fe-service
+  name: frontend
   labels:
-    run: fe-service
+    run: frontend
 spec:
   type: NodePort
 
@@ -15,45 +15,18 @@ spec:
   selector:
     frontend: boot-frontend
 ---
-apiVersion: v1
-kind: Service
-metadata:
-  name: boot-app
-  labels:
-    run: boot-app
-spec:
-  type: NodePort
-
-  ports:
-  - port: 8080
-    targetPort: 8080
-    protocol: TCP
-    name: http
-  selector:
-    app: spring-boot-app
----
 apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
-  name: "app-deployment"
+  name: "frontend"
 spec:
   replicas: 3
   template:
     metadata:
       labels:
-        app: spring-boot-app
         frontend: boot-frontend
     spec:
       containers:
-        - name: api
-          image: gcr.io/cloudjlb-eventer/spring-boot-app:latest
-          resources:
-            requests:
-              cpu: 100m
-              memory: 100Mi
-          ports:
-          - containerPort: 8080
-
         - name: app-nginx
           image: gcr.io/cloudjlb-eventer/web-frontend:latest
           resources:
@@ -62,4 +35,3 @@ spec:
               memory: 100Mi
           ports:
            - containerPort: 80
-

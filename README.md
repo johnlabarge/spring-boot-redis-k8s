@@ -13,7 +13,6 @@
 ### 4. Load Balancer
 #### a. GKE ingress (https)
 ### 5. Other
-#### a. combined fe+api vs. separate
 #### b. self signed cert
 
 ## Prerequisites
@@ -52,42 +51,32 @@ $ gradle deployFEImage
 $ gradle deployBootImage
 $ gradle deployRedisImage
 ```
-#### 3. Deploy redis cache pods
+#### 3. Deploy to GKE (compressed)
 ```
-$ kubectl create -f kubernetes/redis/redis-master.yml
-$ kubectl create -f kubernetes/redis/redis-slave.yml
-$ kubectl create -f kubernetes/redis/redis-sentinel.yml
+gradle deployToGKE
 ```
-
-#### 4. (Optional) Deploy combined app & fe
+##### Issues the following
+$ kubectl create -f kubernetes-build/redis/
+$ kubectl create -f kubernetes-build/frontend/
+$ kubectl create -f kubernetes-build/app/
+$ kubectl create -f kubernetes/load-balancer
 ```
-$ kubectl create -f kubernetes/combined/combined.yml
-```
-
-#### 5. (Or) Deploy app & fe separately
-```
-$ kubectl create -f kubernetes/frontend/fe.yml
-$ kubectl create -f kubernetes/app/app.yml
-```
-#### 6. Deploy load balancer
-```
-$ kubectl create -f kubernetes/self-signed-tls-secret.yml
-$ kubectl create -f kubernetes/app-ingress.yml
-```
-### 7. Visit app
+### 4. Visit app
 
 ```
 $ kubectl get ing
 NAME           HOSTS     ADDRESS          PORTS     AGE
 boot-ingress   *         35.186.209.205   80        9m
 ```
+Note: may take a while for the ADDRESS to issue - repeat command until then
+
 Type in browser : https://<ADDRESS above>
 Note it is a self signed certificate so you will need to dismiss the warning and allow the browser to proceed to the site.
 
 This will present the angular app.  Alternatively you can send postman to
 https://<ADDRESS above>/api/events
 
-### 8. Create mahem with redis and ensure still cached
+### 5. Create mayhem with redis and ensure still cached
 Example:
 ```
 kubectl exec -it redis-master -- kill 1
@@ -96,3 +85,9 @@ Or just use chaoskube:
 ```
 kubectl create -f kubernetes/chaos/chaos.yml
 ```
+
+### 6.  Cleanup
+```
+gradle deleteFromGKE
+```
+Deletes the resources creaetd above from GKE
