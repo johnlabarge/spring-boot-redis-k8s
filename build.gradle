@@ -24,19 +24,24 @@ jar {
 }
 project.ext.gcp = "gcr.io/cloudjlb-eventer"
 
+class SimpleDockerBuild extends Exec {
+    String tag;
 
-task buildBootImage(type: Docker, dependsOn: build) {
-    push = false
-    applicationName = jar.baseName
-    tag = "${project.ext.gcp}/${applicationName}"
-    tagVersion=null
-    dockerfile = file('kubernetes/images/spring-boot/Dockerfile')
-    doFirst {
-        copy {
-            from jar
-            into stageDir
-        }
+    public SimpleDockerBuild() {
+        super()
+        executable = "docker"
     }
+
+    void setTag(String t) {
+        tag = t;
+        args = ["build", "-t", tag, "."]
+    }
+
+}
+
+task buildBootImage(type: SimpleDockerBuild) {
+    tag = "${project.ext.gcp}/${jar.baseName}"
+    workingDir = "."
 }
 
 task deployBootImage(type: Exec, dependsOn: buildBootImage) {
@@ -50,39 +55,17 @@ task buildAngular(type: Exec, dependsOn: npmInstall) {
     workingDir "web-frontend/eventer"
     commandLine "ng", "build"
 }
-task buildFeImage(type: Docker, dependsOn: buildAngular) {
-    push = false
+task buildFeImage(type: SimpleDockerBuild) {
     tag = "${project.ext.gcp}/web-frontend"
-    dockerfile = file('kubernetes/images/frontend/Dockerfile')
-    doFirst {
-        copy {
-            from file("web-frontend/eventer/dist")
-            into file(stageDir.getPath()+'/dist')
-        }
-        copy {
-            from file("web-frontend/eventer/nginx.conf")
-            into stageDir
-        }
-    }
+    workingDir = "web-frontend"
 }
 task deployFeImage(type: Exec, dependsOn: buildFeImage) {
     commandLine "gcloud", "docker", "--", "push",  "${buildFeImage.tag}"
 }
 
-task buildRedisImage(type: Docker) {
-    push = false
+task buildRedisImage(type: SimpleDockerBuild) {
     tag = "${project.ext.gcp}/redis-sentinel"
-    dockerfile = file("kubernetes/images/redis/Dockerfile")
-    doFirst {
-        copy {
-            from file("kubernetes/images/redis/docker-entrypoint.sh")
-            into file(stageDir.getPath())
-        }
-        copy {
-            from file("kubernetes/images/redis/redis.conf")
-            into file(stageDir.getPath())
-         }
-    }
+    workingDir = "kubernetes/images/redis"
 }
 
 

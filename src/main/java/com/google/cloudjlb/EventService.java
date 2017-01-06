@@ -33,7 +33,6 @@ public class EventService {
               .externalLink(String.format("http://notimplemented/events/%d",i))
               .build()
       );
-      System.out.println("done....");
     }
   }
   @Cacheable("getAllEvents")
