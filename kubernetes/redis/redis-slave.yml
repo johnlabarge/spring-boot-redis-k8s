@@ -23,6 +23,7 @@ spec:
     metadata:
       labels:
         app: redis-slave
+        component: redis-cache
     spec:
       terminationGracePeriodSeconds: 10
       containers:
@@ -33,8 +34,9 @@ spec:
         - name: TYPE
           value: SLAVE
         - name: MASTER
-          value: redis-master-0.redis-master
+          value: redis-master
         ports:
         - containerPort: 6379
           name: redis-slave
 
+#TODO HEALTH CHECKS

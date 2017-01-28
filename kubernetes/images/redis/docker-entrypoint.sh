@@ -11,9 +11,15 @@ set -- $(which redis-server) /usr/local/etc/redis/redis.conf
 
 case $TYPE in
 SLAVE)
-  set -- $@ --slaveof $MASTER 6379
+  master=$MASTER
+  host_number=$(hostname | awk -F "." '{print $1}' | awk -F "-" '{print $3}')
+  if [ "$host_number" -ne "0" ];
+  then
+    master_host_number=$((($host_number-1)))
+    master=$(hostname | sed "s/$host_number/$master_host_number/")
+  fi
+  set -- $@ --slaveof $master 6379
 ;;
-
 SENTINEL)
 cat <<EOF >>/usr/local/etc/redis/redis.conf
 

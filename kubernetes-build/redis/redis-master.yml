@@ -12,6 +12,22 @@ spec:
   selector:
     app: redis-master
 ---
+apiVersion: v1
+kind: Service
+metadata:
+  name: redis-replication
+  labels:
+    app: redis
+  annotations:
+      service.spec.sessionAffinity: ClientIP
+spec:
+  ports:
+  - port: 6379
+    name: redis-replication
+  clusterIP: None
+  selector:
+    component: redis-cache
+---
 apiVersion: apps/v1beta1
 kind: StatefulSet
 metadata:
@@ -23,6 +39,7 @@ spec:
     metadata:
       labels:
         app: redis-master
+        component: redis-cache
     spec:
       terminationGracePeriodSeconds: 10
       containers:
