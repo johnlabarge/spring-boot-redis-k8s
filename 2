@@ -1,0 +1,76 @@
+#set -x
+
+export GOPATH=$HOME/golang
+export GOROOT=/usr/local/go
+export PATH=$PATH:$GOPATH/bin
+export PATH=$PATH:$GOROOT/bin
+export PATH="$HOME/.node/bin:$PATH"
+export PATH="$HOME/goaesdk:$PATH"
+
+function kds() {
+  kubectl delete service @ 
+}
+function kdp() { 
+ kubectl delete pod $@
+} 
+function ing() { 
+ kubectl get ing 
+} 
+function kdi() { 
+ kubectl delete ing %@
+} 
+function pods() {
+  kubectl get pods
+}
+function gip() {
+  gcloud compute instances list | grep $1 | awk '{print $5}'
+} 
+function gtunnel() {
+   port=$1
+   gcompute=$2
+   ip=$(gip $2)
+   echo "tunnelling localhost:port to $gcompute:$port" 
+   ssh -L $port:localhost:$port $ip -i ~/.ssh/google_compute_engine -N
+} 
+
+function ws() {
+   ssh `wsh`
+}
+function wsh() {
+  echo 'johnlabarge.aus.corp.google.com'
+}
+
+function firewall_opt_out() {
+    REASON=$1 
+    PROJECT=$(gcloud config list  | grep project | awk '{print $3}')
+    POLICY="gce-enforcer-fw-opt-out=$REASON" 
+    echo "gcloud alpha projects update $PROJECT --update-labels=\"$POLICY\""
+    gcloud alpha projects update $PROJECT --update-labels="$POLICY"
+    #gcloud --project $PROJECT compute project-info add-metadata --metadata firewall-policy=$POLICY
+}
+function galias_tunnel() {
+   port=$1
+   gcompute=$2
+   ip=$(gip $2) 
+   alias=$3
+   sudo ifconfig lo0 alias $alias
+   ssh -L $port:$alias:$port $ip -i ~/.ssh/google_compute_engine -N
+} 
+
+# The next line updates PATH for the Google Cloud SDK.
+source '/Users/johnlabarge/google-cloud-sdk/path.bash.inc'
+
+# The next line enables shell command completion for gcloud.
+source '/Users/johnlabarge/google-cloud-sdk/completion.bash.inc'
+
+# added by Anaconda3 4.1.0 installer
+export PATH="/usr/local/anaconda3/bin:$PATH"
+
+# added by Anaconda2 4.1.0 installer
+export PATH="/usr/local/anaconda2/bin:$PATH"
+
+# added by Anaconda2 4.1.0 installer
+export PATH="/usr/local/anaconda2/bin:$PATH"
+export PATH=$HOME/bin:$PATH
+
+[[ -s "$HOME/.rvm/scripts/rvm" ]] && source "$HOME/.rvm/scripts/rvm" # Load RVM into a shell session *as a function*

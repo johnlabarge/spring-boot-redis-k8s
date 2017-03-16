@@ -1,5 +1,5 @@
 #!/bin/bash
-printf " THIS PART IS WORKING \n"
+
 #EXIT ON NONZERO response
 set -e
 #TRACE
@@ -29,6 +29,14 @@ sentinel failover-timeout master 300
 sentinel parallel-syncs master 1
 EOF
 set -- $@ --port 26379 --sentinel
+;;
+MASTER)
+echo "test"
+cat <<EOF >>/usr/local/etc/redis/redis.conf
+save 60 1
+dbfilename redis.rdp
+dir /var/redis-data
+EOF
 ;;
 esac
 

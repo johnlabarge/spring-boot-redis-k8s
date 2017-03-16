@@ -126,7 +126,8 @@ task deleteFromGKE << {
     exec { commandLine kubedel + ["deployment", "frontend"] }
     exec { commandLine kubedel + ["service", "frontend"] }
     exec { commandLine kubedel + ["service", "api"] }
-    exec { commandLine kubedel + ["service", "redis-replication"] }
+    exec { commandLine kubedel + ["pvc", "redis-data-claim"]}
+   // exec { commandLine kubedel + ["service", "redis-replication"] }
     exec { commandLine kubedel + ["ing", "boot"] }
     exec { commandLine kubedel + ["secret", "self-signed-cert"] }
 }

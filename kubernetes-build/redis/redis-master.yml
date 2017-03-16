@@ -1,32 +1,14 @@
+kind: PersistentVolumeClaim
 apiVersion: v1
-kind: Service
 metadata:
-  name: redis-master
-  labels:
-    app: redis-master
-spec:
-  ports:
-  - port: 6379
-    name: redis-master
-  clusterIP: None
-  selector:
-    app: redis-master
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: redis-replication
-  labels:
-    app: redis
+  name: redis-data-claim
   annotations:
-      service.spec.sessionAffinity: ClientIP
+    volume.alpha.kubernetes.io/storage-class: anything
 spec:
-  ports:
-  - port: 6379
-    name: redis-replication
-  clusterIP: None
-  selector:
-    component: redis-cache
+  accessModes: [ "ReadWriteOnce" ]
+  resources:
+    requests:
+      storage: 20Gi
 ---
 apiVersion: apps/v1beta1
 kind: StatefulSet
@@ -46,7 +28,16 @@ spec:
       - name: redis-master
         image: gcr.io/cloudjlb-eventer/redis-sentinel
         imagePullPolicy: Always
+        env:
+        - name: TYPE
+          value: MASTER
         ports:
         - containerPort: 6379
           name: redis-master
-
+        volumeMounts:
+        - mountPath: /var/redis-data
+          name: redis-data
+      volumes:
+        - name: redis-data
+          persistentVolumeClaim:
+            claimName: redis-data-claim
